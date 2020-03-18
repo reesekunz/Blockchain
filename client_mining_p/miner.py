@@ -15,7 +15,14 @@ def proof_of_work(block):
     in an effort to find a number that is a valid proof
     :return: A valid proof for the provided block
     """
-    pass
+    # stringify block
+    block_string = json.dumps(block, sort_keys=True)
+    proof = 0
+    # increment proof until self.valid_proof returns True
+    while self.valid_proof(block_string, proof) is False:
+        proof += 1
+
+        return proof
 
 
 def valid_proof(block_string, proof):
@@ -29,7 +36,12 @@ def valid_proof(block_string, proof):
     correct number of leading zeroes.
     :return: True if the resulting hash is a valid proof, False otherwise
     """
-    pass
+    guess = f'{block_string}{proof}'.encode(
+    )  # encode turns string into bytes
+    guess_hash = hashlib.sha256(guess).hexdigest()
+    # check if first 3 values start with 000
+    print(guess_hash, "guess_hash")
+    return guess_hash[:3] == '000'
 
 
 if __name__ == '__main__':
@@ -62,7 +74,7 @@ if __name__ == '__main__':
 
         # When found, POST it to the server {"proof": new_proof, "id": id}
         post_data = {"proof": new_proof, "id": id}
-
+        
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
 

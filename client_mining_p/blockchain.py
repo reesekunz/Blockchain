@@ -138,29 +138,55 @@ node_identifier = str(uuid4()).replace('-', '')
 
 # Instantiate the Blockchain
 blockchain = Blockchain()
+# TODO - Modify the `mine` endpoint to instead receive and validate or reject a new proof sent by a client.
+#   - It should accept a POST
+#       - Note that `request` and `requests` both exist in this project
+#     - Check that 'proof', and 'id' are present
+#       - return a 400 error using `jsonify(response)` with a 'message'
+# - Return a message indicating success or failure. Remember, a valid proof should fail for all senders except the first.
+
 
 # [{genesis block}, {hashOfGenisis, proof}, {hash_of_last_block, proof_of_last_block}, {hash_of_last_block, proof_of_last_block} ]
-@app.route('/mine', methods=['GET'])
+@app.route('/mine', methods=['GET', 'POST'])
 def mine():
-    # grab last block in chain
-    block = blockchain.last_block
-    # Run the proof of work algorithm to get the next proof. Look for some # that results in a pattern in our hash. That # is our proof.
-    proof = blockchain.proof_of_work(block)
-    # hash the new block
-    block_hash = blockchain.hash(block)
-    # Forge the new Block by adding it to the chain with the proof
-    new_block = blockchain.new_block(proof, block_hash)
+    # pull the data out of the POST
+    data = request.get_json()
+    print("data = ", data)
+    # proof = request.get_json['proof']
+    # id = request.get_json['id']
+    # proof and id are not present
+    if data is None:
+        # if proof is None and id is None:
+        response = {
+            "message": "No data and/or no proof found. :("
+        }
+        return jsonify(response), 400
+     # proof and id are present
+    else:
+        response = {
+            "message": "SUCCESS :)"
+        }
+        return jsonify(response), 200
 
-    response = {
+        # # grab last block in chain
+        # block = blockchain.last_block
+        # # Run the proof of work algorithm to get the next proof. Look for some # that results in a pattern in our hash. That # is our proof.
+        # proof = blockchain.proof_of_work(block)
+        # # hash the new block
+        # block_hash = blockchain.hash(block)
+        # # Forge the new Block by adding it to the chain with the proof
+        # new_block = blockchain.new_block(proof, block_hash)
 
-        "message": "Hey I found a proof! And forged a new block",
-        "index": new_block['index'],
-        "transactions": new_block['transactions'],
-        "proof": new_block['proof'],
-        'previous_hash': block_hash
-    }
+        # response = {
 
-    return jsonify(response), 200
+        #     "message": "Hey I found a proof! And forged a new block",
+        #     "index": new_block['index'],
+        #     "transactions": new_block['transactions'],
+        #     "proof": new_block['proof'],
+        #     'previous_hash': block_hash
+        # }
+
+        # return jsonify(response), 200
 
 
 @app.route('/chain', methods=['GET'])
