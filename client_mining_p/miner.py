@@ -4,6 +4,8 @@ import requests
 import sys
 import json
 
+# Run server in one terminal and miner in other terminal.
+
 
 def proof_of_work(block):
     """
