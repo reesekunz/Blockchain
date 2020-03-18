@@ -1,4 +1,4 @@
-# Same file as blockchain.py from basic_block_gp
+# same file as blockchain.py from basic_block_gp just copied over
 import hashlib
 import json
 from time import time
@@ -35,7 +35,7 @@ class Blockchain(object):
         block = {
             "index": len(self.chain) + 1,
             # dont need self.proof since being passed as an argument (same with previous_hash)
-            # "proof": proof,
+            "proof": proof,
             "timestamp": time(),  # from time module import
             # list of all the transactions we want to be included in history
             "transactions": self.current_transactions,
@@ -87,22 +87,22 @@ class Blockchain(object):
     def last_block(self):
         return self.chain[-1]
 
-    # def proof_of_work(self, block):
-    #     """
-    #     Simple Proof of Work Algorithm
-    #     Stringify the block and look for a proof.
-    #     Loop through possibilities, checking each one against `valid_proof`
-    #     in an effort to find a number that is a valid proof
-    #     :return: A valid proof for the provided block
-    #     """
-    #     # stringify block
-    #     block_string = json.dumps(block, sort_keys=True)
-    #     proof = 0
-    #     # increment proof until self.valid_proof returns True
-    #     while self.valid_proof(block_string, proof) is False:
-    #         proof += 1
+    def proof_of_work(self, block):
+        """
+        Simple Proof of Work Algorithm
+        Stringify the block and look for a proof.
+        Loop through possibilities, checking each one against `valid_proof`
+        in an effort to find a number that is a valid proof
+        :return: A valid proof for the provided block
+        """
+        # stringify block
+        block_string = json.dumps(block, sort_keys=True)
+        proof = 0
+        # increment proof until self.valid_proof returns True
+        while self.valid_proof(block_string, proof) is False:
+            proof += 1
 
-    #     return proof
+        return proof
 
     @staticmethod
     def valid_proof(block_string, proof):
@@ -120,9 +120,10 @@ class Blockchain(object):
         )  # encode turns string into bytes
         guess_hash = hashlib.sha256(guess).hexdigest()
         # check if first 3 values start with 000
-        # changed from 3 to 6
         print(guess_hash, "guess_hash")
-        return guess_hash[:6] == '000000'
+        # TODO TODO TODO return guess_hash[:6] == '000000'
+        return guess_hash[:3] == '000'
+
         # if guess_hash[:3] == '000':
         #     return True
         # else:
@@ -144,18 +145,18 @@ def mine():
     # grab last block in chain
     block = blockchain.last_block
     # Run the proof of work algorithm to get the next proof. Look for some # that results in a pattern in our hash. That # is our proof.
-    # proof = blockchain.proof_of_work(block)
+    proof = blockchain.proof_of_work(block)
     # hash the new block
     block_hash = blockchain.hash(block)
     # Forge the new Block by adding it to the chain with the proof
-    new_block = blockchain.new_block(block_hash)
+    new_block = blockchain.new_block(proof, block_hash)
 
     response = {
 
         "message": "Hey I found a proof! And forged a new block",
         "index": new_block['index'],
         "transactions": new_block['transactions'],
-        # "proof": new_block['proof'],
+        "proof": new_block['proof'],
         'previous_hash': block_hash
     }
 
@@ -171,13 +172,12 @@ def full_chain():
     }
     return jsonify(response), 200
 
-    # Add an endpoint called `last_block` that returns the last block in the chain
-
 
 @app.route('/last_block', methods=['GET'])
 def last_block():
     response = {
-        "last_block": blockchain.chain[-1]
+        # "last_block": blockchain.chain[-1]
+        "last_block": blockchain.last_block
     }
     return jsonify(response), 200
 
