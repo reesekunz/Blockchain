@@ -50,6 +50,19 @@ class Blockchain(object):
         # Return the new block
         return block
 
+    def new_transaction(self, sender, receiver, amount):
+        new_transaction = {
+            "timestamp": time(),
+            "sender": sender,
+            "receiver": receiver,
+            "amount": amount
+        }
+        # new transaction goes into the next block
+        self.current_transactions.append(new_transaction)
+        # return index of block that will hold this transaction
+        future_index = self.last_block['index'] + 1
+        return future_index
+
     def hash(self, block):
         """
         Creates a SHA-256 hash of a Block
@@ -104,7 +117,8 @@ class Blockchain(object):
         guess_hash = hashlib.sha256(guess).hexdigest()
         # check if first 3 values start with 000
         print(guess_hash, "guess_hash")
-        return guess_hash[:6] == '000000'
+        # return guess_hash[:6] == '000000'
+        return guess_hash[:3] == '000'
 
         # if guess_hash[:3] == '000':
         #     return True
@@ -148,14 +162,17 @@ def mine():
 
     # if proof and id are present - make sure its valid
     submitted_proof = data['proof']
+    miner_id = data['id']
     block_string = json.dumps(blockchain.last_block, sort_keys=True)
     is_valid_proof = blockchain.valid_proof(block_string, submitted_proof)
     if is_valid_proof:
         # now that we know its a valid proof, we can make a new block
         previous_hash = blockchain.hash(blockchain.last_block)
-        new_block = blockchain.new_block(proof, previous_hash)
+        new_block = blockchain.new_block(submitted_proof, previous_hash)
+        blockchain.new_transaction(sender='0', receiver=miner_id, amount=1)
         response = {
             "message": "New Block Forged"
+
         }
     # submitted proof is not a valid proof
     else:
@@ -181,6 +198,22 @@ def last_block():
         # "last_block": blockchain.chain[-1]
         "last_block": blockchain.last_block
     }
+    return jsonify(response), 200
+
+# this is NOT secure!
+# now someone can send a new transaction to someone else
+@app.route('/transactions/new', methods=["POST"])
+def new_transaction():
+    data = request.get_json()
+    required = ['sender', 'receiver', 'amount']
+    if not all(x in data for x in required):
+        response = {"message": "Missing values."}
+        return jsonify(response), 400
+
+    index = blockchain.new_transaction(
+        sender=data["sender"], receiver=data["receiver"], amount=data["amount"])
+    response = {"message": f"Your transaction will be in block {index} "}
+
     return jsonify(response), 200
 
 

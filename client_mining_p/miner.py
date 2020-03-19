@@ -22,7 +22,7 @@ def proof_of_work(block):
     while valid_proof(block_string, proof) is False:
         proof += 1
 
-        return proof
+    return proof
 
 
 def valid_proof(block_string, proof):
@@ -41,7 +41,9 @@ def valid_proof(block_string, proof):
     guess_hash = hashlib.sha256(guess).hexdigest()
     # check if first 6 values start with 0
     # print(guess_hash, "guess_hash")
-    return guess_hash[:6] == '000000'
+    # return guess_hash[:6] == '000000'
+    return guess_hash[:3] == '000'
+
 
 # Grab last block. Use that last block to look for our proof of work and send that proof of work into our server (and hope we are the first one.
 
