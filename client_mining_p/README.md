@@ -33,3 +33,4 @@ Create a client application that will:
 - Change the name in `my_id.txt` to your name
 - (Stretch) Handle non-json responses sent by the server in the event of an error, without crashing the miner
 - Stretch: Add a timer to keep track of how long it takes to find a proof
+
