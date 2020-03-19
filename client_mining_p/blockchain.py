@@ -150,12 +150,12 @@ def mine():
     submitted_proof = data['proof']
     block_string = json.dumps(blockchain.last_block, sort_keys=True)
     is_valid_proof = blockchain.valid_proof(block_string, submitted_proof)
-    if is_valid proof:
+    if is_valid_proof:
         # now that we know its a valid proof, we can make a new block
         previous_hash = blockchain.hash(blockchain.last_block)
         new_block = blockchain.new_block(proof, previous_hash)
         response = {
-            "message": "Congrats fam"
+            "message": "New Block Forged"
         }
     # submitted proof is not a valid proof
     else:

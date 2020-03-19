@@ -19,7 +19,7 @@ def proof_of_work(block):
     block_string = json.dumps(block, sort_keys=True)
     proof = 0
     # increment proof until self.valid_proof returns True
-    while self.valid_proof(block_string, proof) is False:
+    while valid_proof(block_string, proof) is False:
         proof += 1
 
         return proof
@@ -39,9 +39,11 @@ def valid_proof(block_string, proof):
     guess = f'{block_string}{proof}'.encode(
     )  # encode turns string into bytes
     guess_hash = hashlib.sha256(guess).hexdigest()
-    # check if first 3 values start with 000
-    print(guess_hash, "guess_hash")
-    return guess_hash[:3] == '000'
+    # check if first 6 values start with 0
+    # print(guess_hash, "guess_hash")
+    return guess_hash[:6] == '000000'
+
+# Grab last block. Use that last block to look for our proof of work and send that proof of work into our server (and hope we are the first one.
 
 
 if __name__ == '__main__':
@@ -57,6 +59,7 @@ if __name__ == '__main__':
     print("ID is", id)
     f.close()
 
+    coins_mined = 0
     # Run forever until interrupted
     while True:
         r = requests.get(url=node + "/last_block")
@@ -70,15 +73,24 @@ if __name__ == '__main__':
             break
 
         # TODO: Get the block from `data` and use it to look for a new proof
-        # new_proof = ???
+        # last_block = data.get('last_block') SAME AS
+        last_block = data['last_block']
+        print("starting to look for a proof of work")
+        new_proof = proof_of_work(last_block)
+        print(f'Proof found: {new_proof}')
 
         # When found, POST it to the server {"proof": new_proof, "id": id}
         post_data = {"proof": new_proof, "id": id}
-        
+
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
 
         # TODO: If the server responds with a 'message' 'New Block Forged'
         # add 1 to the number of coins mined and print it.  Otherwise,
         # print the message from the server.
-        pass
+        if data['message'] == "New Block Forged":
+            coins_mined += 1
+            print(f'We mined a coin! Coins mined: {coins_mined}')
+
+        else:
+            print(data['message'])
